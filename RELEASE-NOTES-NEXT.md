@@ -1,27 +1,34 @@
 # Ledgable — Next Release Notes
 
-**Version:** 1.0.0 (build 2)  
-**Target:** TestFlight / App Store Connect  
+**Version:** 1.0.0 (build 3)
+**Target:** TestFlight / App Store Connect
 **Prepared:** 2026-07-05
 
 ---
 
 ## What's New for Users
 
-### New App Icon
-Complete ground-up icon redesign. The new mark shows a stylised accounting ledger page — a white sheet with a bold teal corner fold and four teal rule lines — on an ink-navy background. Designed to be instantly legible at every size from the App Store (1024px) down to the iPhone home screen spotlight (20px).
+### New App Icon (build 3)
+Complete ground-up icon redesign — v9 final. The mark shows a stylised accounting ledger page: pure white sheet with a dominant teal corner fold (41% of page edge) and three bold teal rule lines, on an ink-navy background. Designed to be instantly legible at every size from the App Store (1024px) down to the iPhone home screen spotlight (20px).
 
-Brand colours: Ledger Teal `#0D9488` on Ink Navy `#0F172A`, per the Ledgable brand standard.
+Brand colours: Ledger Teal `#0D9488` on Ink Navy `#0F172A` per the Ledgable brand standard.
+
+Changes from build 2 icon:
+- Page changed from pale grey `#EDF2F7` to pure white `#FFFFFF` — stronger contrast at all sizes
+- Fold triangle enlarged to 360px legs (41% of page edge) — dominant and readable at 60px
+- Rules reduced from 4 to 3 — each rule is bolder (36px stroke) and holds its legibility at 20px
+- Removed crease line and vertical column divider — cleaner silhouette at small sizes
+- Rules redistributed vertically (y=330/530/730) for even spacing across page body
 
 ---
 
 ## Technical Changes This Build
 
-- `flutter_launcher_icons ^0.14.3` added as dev dependency
-- Master icon PNG (1024×1024) at `assets/icons/app-icon-1024.png`
-- iOS `AppIcon.appiconset` fully regenerated — all required sizes including 1024@1x, 83.5@2x, 60@2x/3x, 40@1x/2x/3x, 29@1x/2x/3x, 20@1x/2x/3x, 76@1x/2x, 50@1x/2x, 57@1x/2x, 72@1x/2x
+- Master icon PNG (1024×1024) updated at `assets/icons/app-icon-1024.png`
+- iOS `AppIcon.appiconset` fully regenerated — 21 PNG files covering all required sizes:
+  1024@1x, 83.5@2x, 76@1x/2x, 72@1x/2x, 60@2x/3x, 57@1x/2x, 50@1x/2x, 40@1x/2x/3x, 29@1x/2x/3x, 20@1x/2x/3x
 - Android mipmaps regenerated — mdpi / hdpi / xhdpi / xxhdpi / xxxhdpi
-- Build number bumped: +1 → 2
+- Build number bumped: 2 → 3
 
 ---
 
