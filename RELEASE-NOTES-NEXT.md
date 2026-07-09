@@ -1,24 +1,27 @@
 # Ledgable — Next Release Notes
 
-**Version:** 1.0.0 (build 3)
+**Version:** 1.0.0 (build 4)
 **Target:** TestFlight / App Store Connect
-**Prepared:** 2026-07-05
+**Prepared:** 2026-07-09
 
 ---
 
 ## What's New for Users
 
-### New App Icon (build 3)
-Complete ground-up icon redesign — v9 final. The mark shows a stylised accounting ledger page: pure white sheet with a dominant teal corner fold (41% of page edge) and three bold teal rule lines, on an ink-navy background. Designed to be instantly legible at every size from the App Store (1024px) down to the iPhone home screen spotlight (20px).
+### New App Icon (build 4) — Ground-Up Redesign
+Complete redesign of the app icon (v10). The mark shows a white accounting ledger page with a bold teal corner fold (top-right, 360×360px / 45° diagonal) and three ledger entry rows in the lower half. Each row uses a **two-column format** — a wider description bar on the left and a narrower amount bar on the right — representing a classic double-column accounting ledger.
 
-Brand colours: Ledger Teal `#0D9488` on Ink Navy `#0F172A` per the Ledgable brand standard.
+Brand colours: Ledger Teal `#0D9488` on White page, Ink Navy `#0F172A` background.
 
-Changes from build 2 icon:
-- Page changed from pale grey `#EDF2F7` to pure white `#FFFFFF` — stronger contrast at all sizes
-- Fold triangle enlarged to 360px legs (41% of page edge) — dominant and readable at 60px
-- Rules reduced from 4 to 3 — each rule is bolder (36px stroke) and holds its legibility at 20px
-- Removed crease line and vertical column divider — cleaner silhouette at small sizes
-- Rules redistributed vertically (y=330/530/730) for even spacing across page body
+Key changes from build 3:
+- Solid filled rectangles replace rounded stroke lines — reads as an accounting tool, not a generic document icon
+- Two-column layout (description | amount) is specific to ledgers, not shared by every file/note app
+- Sharp square corners throughout — precision over friendliness
+- Row proportions tuned: 76px height, 56px gaps, balanced head/foot margins
+- `remove_alpha_ios: true` added to pubspec — App Store alpha-channel compliant
+
+### Previous Release (build 3)
+Icon v9: white page with teal corner fold and three horizontal rule lines. First major icon redesign.
 
 ---
 
