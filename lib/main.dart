@@ -25,17 +25,7 @@ Future<void> main() async {
   );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  runApp(
-    ProviderScope(
-      child: Consumer(
-        builder: (context, ref, _) {
-          // Kick off the keychain read and /me once, on first build.
-          ref.listen(authControllerProvider, (_, _) {});
-          return const _Bootstrap();
-        },
-      ),
-    ),
-  );
+  runApp(const ProviderScope(child: _Bootstrap()));
 }
 
 /// Starts the session restore and then hands over to [LedgableApp].

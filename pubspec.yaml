@@ -101,8 +101,10 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
 
-  assets:
-    - assets/icons/app-icon-1024.png
+  # No `assets:` block. The only thing under assets/ besides the fonts is the
+  # 1024px master icon, which flutter_launcher_icons reads from disk when it
+  # generates the platform icon sets — the app never loads it at runtime, so
+  # bundling it would ship bytes nothing reads.
 
   # Inter and Plus Jakarta Sans are bundled rather than fetched at runtime.
   #

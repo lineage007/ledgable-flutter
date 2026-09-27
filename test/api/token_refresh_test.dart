@@ -278,11 +278,21 @@ void main() {
     test('a server error during refresh keeps the session — it is not a rejection', () async {
       await client.session.adopt(tokensExpiring(const Duration(seconds: -1)));
       http.on('POST', '/auth/refresh', [
-        FakeReply(503, {'error': 'unavailable'}),
+        FakeReply(503, {'error': 'Ledgable is having a moment'}),
       ]);
       http.on('GET', '/dashboard', [FakeReply(200, const {})]);
 
-      await expectLater(client.get('/dashboard'), throwsA(isA<Object>()));
+      await expectLater(
+        client.get('/dashboard'),
+        // The server's own message survives. A proactive refresh throws from
+        // inside onRequest and Dio wraps it; without unwrapping, this would
+        // surface as a generic connection error instead.
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'statusCode', 503)
+              .having((e) => e.message, 'message', 'Ledgable is having a moment'),
+        ),
+      );
 
       expect(
         client.session.hasSession,

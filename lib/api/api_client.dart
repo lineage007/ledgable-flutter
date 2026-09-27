@@ -153,6 +153,14 @@ class ApiClient {
       if (error.error is SessionExpiredException) {
         throw error.error as SessionExpiredException;
       }
+      // A proactive refresh that failed with a 503 or a 429 throws its own
+      // ApiException from inside onRequest, and Dio wraps it. Unwrap it rather
+      // than re-deriving one from a DioException that has no response attached,
+      // which would replace "Ledgable had a problem at its end" with a generic
+      // connection message.
+      if (error.error is ApiException) {
+        throw error.error as ApiException;
+      }
       throw ApiException.fromDioException(error);
     }
   }
