@@ -122,10 +122,16 @@ families ship as assets (~2.2 MB) with their SIL OFL 1.1 licences.
   add later without touching the login path.
 - **No in-app receipt image preview.** The API returns metadata and extractions;
   there is no endpoint serving the stored image bytes. See Handoff 3.
-- **Editing an OCR extraction, matching a receipt to a transaction, recording a
-  payment, voiding an invoice** — all web-only, because the mobile API exposes
-  no write path for them. Each screen says so rather than offering a control
-  that cannot save.
+- **Receipt review shows and checks, but cannot "confirm".** The brief asked for
+  "review/confirm"; the review half is built, the confirm half has no endpoint.
+  `/receipts` is GET and POST, `/receipts/{id}` is GET only — there is no way to
+  mark an extraction `REVIEWED`, correct a misread figure, or match a receipt to
+  a bank transaction. The screen surfaces the reading, flags what is worth
+  checking, and says the corrections happen on the web. Adding a
+  `PATCH /receipts/{id}/extraction` would close this; folded into Handoff 3.
+- **Recording a payment and voiding an invoice** are likewise web-only, for the
+  same reason. Each screen says so rather than offering a control that cannot
+  save.
 - **Category list is derived, not fetched.** See Handoff 1.
 - **Receipt list pagination** loads 50 and does not page further. The API does
   it in memory anyway (a known gap in PLAN.md §10); fine at hundreds.
@@ -149,10 +155,12 @@ families ship as assets (~2.2 MB) with their SIL OFL 1.1 licences.
 2. **MFA on the mobile login path** (web/mobile API owner). If MFA is enforced
    for web sign-in, a phone currently bypasses it. Worth confirming whether
    that is intended; if not, the mobile login needs a challenge step.
-3. **A receipt image endpoint** (web/mobile API owner). Reviewing an extraction
-   without being able to see the photograph means checking a figure against a
-   receipt that is no longer in your hand. A signed short-lived URL on
-   `GET /receipts/{id}` would do it.
+3. **Receipt review needs two things from the API** (web/mobile API owner):
+   a **signed short-lived image URL** on `GET /receipts/{id}` — reviewing an
+   extraction without seeing the photograph means checking a figure against a
+   receipt that is no longer in your hand — and a **write path for the
+   extraction**, so "confirm this reading" and "that total is wrong" can happen
+   where the receipt was captured rather than back at a desk.
 4. **Native approvals** — already filed in `STATUS-mobile.md` on the web side;
    restating the dependency. The app is ready to add the actions as soon as the
    pay-run and leave state machines are shared services.
