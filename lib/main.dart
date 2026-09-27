@@ -10,10 +10,12 @@ import 'screens/more_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
   runApp(const LedgableApp());
 }
 
@@ -33,7 +35,8 @@ class LedgableApp extends StatelessWidget {
 
 class LedgableShell extends StatefulWidget {
   const LedgableShell({super.key});
-  @override State<LedgableShell> createState() => _LedgableShellState();
+  @override
+  State<LedgableShell> createState() => _LedgableShellState();
 }
 
 class _LedgableShellState extends State<LedgableShell> {
@@ -53,7 +56,13 @@ class _LedgableShellState extends State<LedgableShell> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: kWhite,
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, -4))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: SafeArea(
           child: Padding(
@@ -86,11 +95,21 @@ class _LedgableShellState extends State<LedgableShell> {
           color: active ? kTeal.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 22, color: active ? kTeal : kTextTertiary),
-          const SizedBox(height: 4),
-          Text(label, style: GoogleFonts.inter(fontSize: 10, fontWeight: active ? FontWeight.w600 : FontWeight.w500, color: active ? kTeal : kTextTertiary)),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 22, color: active ? kTeal : kTextTertiary),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                color: active ? kTeal : kTextTertiary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
