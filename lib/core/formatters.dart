@@ -1,3 +1,4 @@
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 /// Date and time rendering, Australian conventions throughout: `d MMM yyyy`
@@ -79,24 +80,39 @@ class Dates {
 }
 
 /// Turns a category or status code into something a person reads.
-/// `travel_expenses` → `Travel expenses`, `ACCREC` → `Accrec` is wrong, so
-/// known codes are mapped explicitly and only unknown ones are humanised.
+///
+/// Sentence case rather than title case — `travel_expenses` becomes
+/// "Travel expenses", because "Travel Expenses" reads like a heading in the
+/// middle of a list. Australian tax initialisms stay upper-cased: "Gst free
+/// sales" is wrong in a way a user notices immediately.
 String humanise(String? code) {
   if (code == null || code.isEmpty) return '';
   final spaced = code.replaceAll(RegExp(r'[_\-]+'), ' ').trim();
   if (spaced.isEmpty) return '';
-  // ALL-CAPS enum values read better title-cased word by word.
-  final words = spaced.split(RegExp(r'\s+')).map((word) {
-    if (word.length <= 3 && word == word.toUpperCase() && !RegExp(r'^[A-Z]{2,3}$').hasMatch(word)) {
-      return word;
-    }
-    final lower = word.toLowerCase();
-    return lower[0].toUpperCase() + lower.substring(1);
-  }).toList();
-  // Keep GST, ABN, TFN, BSB, PAYG upper-cased — they are initialisms, not words.
-  const initialisms = {'Gst', 'Abn', 'Tfn', 'Bsb', 'Payg', 'Bas', 'Usi', 'Ato', 'Id'};
+
+  // Initialisms, matched case-insensitively against each word.
+  const initialisms = {'gst', 'abn', 'tfn', 'bsb', 'payg', 'bas', 'usi', 'ato', 'stp', 'acn', 'id'};
+
+  final words = spaced.split(RegExp(r'\s+')).where((word) => word.isNotEmpty).toList();
   for (var i = 0; i < words.length; i++) {
-    if (initialisms.contains(words[i])) words[i] = words[i].toUpperCase();
+    final lower = words[i].toLowerCase();
+    if (initialisms.contains(lower)) {
+      words[i] = lower.toUpperCase();
+    } else if (i == 0) {
+      words[i] = lower[0].toUpperCase() + lower.substring(1);
+    } else {
+      words[i] = lower;
+    }
   }
   return words.join(' ');
+}
+
+/// Loads the locale data `en_AU` date formats need.
+///
+/// Without this, `DateFormat` only knows `en_US` and every Australian date
+/// format in this app throws a `LocaleDataException` at runtime. Called once
+/// from `main()`, and from test setup.
+Future<void> initialiseFormatting() async {
+  await initializeDateFormatting('en_AU');
+  Intl.defaultLocale = 'en_AU';
 }

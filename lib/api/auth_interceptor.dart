@@ -126,6 +126,12 @@ class AuthInterceptor extends Interceptor {
       // 401 through so the caller sees a coherent error.
       return handler.next(err);
     } on DioException catch (retryError) {
+      // The replay was rejected too. A fresh token did not help, so another
+      // refresh will not either — end the session rather than leave the app
+      // looping against a credential the server will not accept.
+      if (retryError.response?.statusCode == 401) {
+        await _session.handleTerminalAuthFailure(ApiException.fromDioException(retryError).code);
+      }
       return handler.next(retryError);
     }
   }
