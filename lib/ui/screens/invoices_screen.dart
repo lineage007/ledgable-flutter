@@ -66,7 +66,7 @@ class InvoicesScreen extends ConsumerWidget {
           ),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () => ref.refresh(invoiceListProvider.future),
+              onRefresh: () => refreshQuietly(() => ref.refresh(invoiceListProvider.future)),
               child: switch (snapshot) {
                 AsyncError(:final error) => ListView(
                   padding: const EdgeInsets.only(top: 60),

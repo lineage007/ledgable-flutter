@@ -25,7 +25,7 @@ class DashboardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const WorkspaceAppBar(title: 'Home'),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(dashboardProvider.future),
+        onRefresh: () => refreshQuietly(() => ref.refresh(dashboardProvider.future)),
         child: switch (snapshot) {
           AsyncData(:final value) => _DashboardBody(dashboard: value),
           AsyncError(:final error) => ListView(

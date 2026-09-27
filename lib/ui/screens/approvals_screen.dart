@@ -30,7 +30,7 @@ class ApprovalsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const WorkspaceAppBar(title: 'Approvals'),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(approvalsProvider.future),
+        onRefresh: () => refreshQuietly(() => ref.refresh(approvalsProvider.future)),
         child: switch (snapshot) {
           AsyncError(:final error) => ListView(
             padding: const EdgeInsets.only(top: 80),

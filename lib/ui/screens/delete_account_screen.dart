@@ -116,6 +116,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         builder: (dialogContext) => _DeletionReceiptDialog(result: result),
       );
       if (!mounted) return;
+      // _deleting stays true on purpose: the account is gone, and re-enabling
+      // the button would offer a second attempt that can only fail.
       ref.read(authControllerProvider.notifier).markAccountDeleted();
     } on Object catch (error) {
       if (!mounted) return;

@@ -29,7 +29,7 @@ class ReceiptsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const WorkspaceAppBar(title: 'Receipts'),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(_receiptsProvider.future),
+        onRefresh: () => refreshQuietly(() => ref.refresh(_receiptsProvider.future)),
         child: switch (snapshot) {
           AsyncError(:final error) => ListView(
             padding: const EdgeInsets.only(top: 80),

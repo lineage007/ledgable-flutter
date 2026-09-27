@@ -10,13 +10,13 @@ brief listed. Fresh run — no previous STATUS file to resume from, and no
 | Gate | Result |
 |---|---|
 | `flutter analyze` | **0 issues**, whole project. |
-| `flutter test` | **113 passing**, 0 failing. |
+| `flutter test` | **131 passing**, 0 failing. |
 | `flutter build ios --no-codesign` | **Built** `build/ios/iphoneos/Runner.app` (20.1 MB), `co.ledgable.app`. |
 | `flutter build apk --debug` | **Built** `build/app/outputs/flutter-apk/app-debug.apk`. |
 | Secrets | None. Config is `--dart-define` only; the app holds no API key. |
 
-Test breakdown: 22 token-flow · 18 money and date · 29 repository ·
-36 widget (4 screens) · 8 golden (4 screens × both themes).
+Test breakdown: 22 token-flow · 19 money and date · 29 repository ·
+7 router/boot · 46 widget (6 screens) · 8 golden (4 screens × both themes).
 
 ## Done
 
@@ -96,6 +96,10 @@ approvals (read-only); settings; devices; delete account.
 5. `"Due ${relative(d).toLowerCase()}"` rendered "Due 15 aug 2026".
 6. A paid invoice headlined `$0.00`, because `amountDue` is zero once settled.
 7. `humanise` title-cased, producing "Travel Expenses" and "Gst Free Sales".
+8. A failed pull-to-refresh left an **unhandled exception** in the zone on
+   every list screen — `ref.refresh(provider.future)` rejects and
+   `RefreshIndicator.onRefresh` does not catch it. Exactly the case that fires
+   when the session has just ended or the phone is offline.
 
 **Fonts bundled rather than fetched.** `google_fonts` downloaded Inter and Plus
 Jakarta Sans on first launch, so a new install showed a fallback face until the

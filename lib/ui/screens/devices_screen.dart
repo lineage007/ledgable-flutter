@@ -80,7 +80,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
       appBar: AppBar(title: const Text('Signed-in devices')),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => ref.refresh(devicesProvider.future),
+          onRefresh: () => refreshQuietly(() => ref.refresh(devicesProvider.future)),
           child: switch (snapshot) {
             AsyncError(:final error) => ListView(
               padding: const EdgeInsets.only(top: 60),

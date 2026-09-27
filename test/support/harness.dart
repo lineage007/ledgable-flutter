@@ -218,6 +218,17 @@ Future<void> settleWithNetwork(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// Advances the clock in fixed steps without waiting for the tree to go quiet.
+///
+/// `pumpAndSettle` never returns while anything is animating, and a progress
+/// spinner animates forever. Use this when a screen is expected to still be
+/// showing one — or a dialog over one — after the call under test resolves.
+Future<void> pumpNetwork(WidgetTester tester, {int steps = 6}) async {
+  for (var i = 0; i < steps; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
 /// Pins the surface to a consistent phone size so goldens do not depend on the
 /// host's default 800×600 test window.
 void useIPhoneSurface(WidgetTester tester, {Size size = const Size(390, 844)}) {

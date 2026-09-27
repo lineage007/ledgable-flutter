@@ -345,6 +345,23 @@ class DetailRow extends StatelessWidget {
   }
 }
 
+/// Runs a refresh without letting its failure escape as an unhandled error.
+///
+/// `ref.refresh(provider.future)` returns a future that *rejects* when the
+/// reload fails. `RefreshIndicator.onRefresh` does not catch it, so a failed
+/// pull-to-refresh — which is exactly what happens when the session has just
+/// ended or the phone is offline — becomes an uncaught exception in the zone.
+/// The provider's own `AsyncError` already carries the failure to the screen,
+/// so there is nothing lost by swallowing it here; the user sees the error
+/// state either way.
+Future<void> refreshQuietly(Future<Object?> Function() reload) async {
+  try {
+    await reload();
+  } on Object {
+    // Surfaced by the provider's AsyncError; see above.
+  }
+}
+
 /// Shows an error to the user in the visible layer, never behind a modal.
 void showErrorToast(BuildContext context, Object error) {
   final api = error is ApiException ? error : null;
