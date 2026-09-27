@@ -187,9 +187,16 @@ class _InvoiceRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    // The amount still owing is the number that matters on a
-                    // list; the total is on the detail screen.
-                    Money.format(invoice.amountDue ?? invoice.total),
+                    // The amount still owing is the number that matters while an
+                    // invoice is outstanding. Once it is paid, amountDue is
+                    // zero, and a row headlining "$0.00" reads as an invoice for
+                    // nothing rather than one that has been settled — so a paid
+                    // invoice shows what it was worth.
+                    Money.format(
+                      invoice.status == InvoiceStatus.paid
+                          ? (invoice.total ?? invoice.amountDue)
+                          : (invoice.amountDue ?? invoice.total),
+                    ),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
@@ -205,14 +212,22 @@ class _InvoiceRow extends StatelessWidget {
             children: [
               Icon(Icons.event_rounded, size: 13, color: colors.textTertiary),
               const SizedBox(width: 6),
-              Text(
-                invoice.status == InvoiceStatus.paid
-                    ? 'Paid in full'
-                    : 'Due ${Dates.relative(invoice.dueDate).toLowerCase()}',
-                style: Theme.of(context).textTheme.bodySmall,
+              // Flexible rather than fixed: a due date that falls back to a full
+              // date ("Due 15 aug 2026") plus the "Not sent yet" flag is wider
+              // than a 390px card, and a Spacer cannot give back space that the
+              // two Texts have already claimed.
+              Flexible(
+                child: Text(
+                  invoice.status == InvoiceStatus.paid
+                      ? 'Paid in full'
+                      : 'Due ${Dates.relativeInline(invoice.dueDate)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
               if (!invoice.sentToContact && invoice.status != InvoiceStatus.paid) ...[
-                const Spacer(),
+                const SizedBox(width: 10),
                 Text(
                   'Not sent yet',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.warning),

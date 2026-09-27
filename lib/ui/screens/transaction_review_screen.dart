@@ -75,10 +75,13 @@ class _TransactionReviewScreenState extends ConsumerState<TransactionReviewScree
       final categories = await _loadCategories();
       if (!mounted) return;
       setState(() {
-        _queue = page.items;
+        // List.of, not the repository's list: the queue is mutated in place when
+        // a swipe removes a row or a failure puts one back, and the repository
+        // hands back a fixed-length list.
+        _queue = List.of(page.items);
         _total = page.page.total;
         _hasMore = page.page.hasMore;
-        _categories = categories;
+        _categories = List.of(categories);
         _loading = false;
       });
     } on Object catch (error) {

@@ -1,5 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+/// The two bundled families. Declared as assets in pubspec.yaml rather than
+/// fetched at runtime, so typography does not depend on connectivity.
+const _body = 'Inter';
+const _display = 'Plus Jakarta Sans';
+
+/// Body copy, figures, labels.
+TextStyle _inter({
+  required double fontSize,
+  FontWeight fontWeight = FontWeight.w400,
+  Color? color,
+  double? height,
+}) => TextStyle(
+  fontFamily: _body,
+  fontSize: fontSize,
+  fontWeight: fontWeight,
+  color: color,
+  height: height,
+);
+
+/// Headings and the large figures. Only 600, 700 and 800 are bundled, which is
+/// every weight this theme asks for.
+TextStyle _jakarta({required double fontSize, required FontWeight fontWeight, Color? color}) =>
+    TextStyle(fontFamily: _display, fontSize: fontSize, fontWeight: fontWeight, color: color);
 
 /// Ledgable brand palette.
 ///
@@ -186,60 +209,24 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
   final base = isDark ? ThemeData.dark() : ThemeData.light();
 
   TextTheme textTheme() {
-    final inter = GoogleFonts.interTextTheme(base.textTheme);
-    return inter.copyWith(
-      displayLarge: GoogleFonts.plusJakartaSans(
-        fontSize: 56,
-        fontWeight: FontWeight.w800,
-        color: c.textPrimary,
-      ),
-      displayMedium: GoogleFonts.plusJakartaSans(
-        fontSize: 40,
-        fontWeight: FontWeight.w800,
-        color: c.textPrimary,
-      ),
-      headlineLarge: GoogleFonts.plusJakartaSans(
-        fontSize: 28,
-        fontWeight: FontWeight.w700,
-        color: c.textPrimary,
-      ),
-      headlineMedium: GoogleFonts.plusJakartaSans(
-        fontSize: 24,
-        fontWeight: FontWeight.w700,
-        color: c.textPrimary,
-      ),
-      headlineSmall: GoogleFonts.plusJakartaSans(
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-        color: c.textPrimary,
-      ),
-      titleLarge: GoogleFonts.plusJakartaSans(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: c.textPrimary,
-      ),
-      titleMedium: GoogleFonts.plusJakartaSans(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        color: c.textPrimary,
-      ),
-      bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400, color: c.textPrimary),
-      bodyMedium: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-        color: c.textSecondary,
-      ),
-      bodySmall: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: c.textTertiary,
-      ),
-      labelLarge: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: c.textPrimary,
-      ),
-    );
+    // apply() sets the family on every unspecified slot, so a widget that reads
+    // e.g. textTheme.labelSmall still gets Inter rather than the platform
+    // default.
+    return base.textTheme
+        .apply(fontFamily: _body)
+        .copyWith(
+          displayLarge: _jakarta(fontSize: 56, fontWeight: FontWeight.w800, color: c.textPrimary),
+          displayMedium: _jakarta(fontSize: 40, fontWeight: FontWeight.w800, color: c.textPrimary),
+          headlineLarge: _jakarta(fontSize: 28, fontWeight: FontWeight.w700, color: c.textPrimary),
+          headlineMedium: _jakarta(fontSize: 24, fontWeight: FontWeight.w700, color: c.textPrimary),
+          headlineSmall: _jakarta(fontSize: 20, fontWeight: FontWeight.w700, color: c.textPrimary),
+          titleLarge: _jakarta(fontSize: 18, fontWeight: FontWeight.w600, color: c.textPrimary),
+          titleMedium: _jakarta(fontSize: 15, fontWeight: FontWeight.w600, color: c.textPrimary),
+          bodyLarge: _inter(fontSize: 16, fontWeight: FontWeight.w400, color: c.textPrimary),
+          bodyMedium: _inter(fontSize: 14, fontWeight: FontWeight.w400, color: c.textSecondary),
+          bodySmall: _inter(fontSize: 12, fontWeight: FontWeight.w400, color: c.textTertiary),
+          labelLarge: _inter(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary),
+        );
   }
 
   return base.copyWith(
@@ -269,11 +256,7 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
-      titleTextStyle: GoogleFonts.plusJakartaSans(
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-        color: c.textPrimary,
-      ),
+      titleTextStyle: _jakarta(fontSize: 20, fontWeight: FontWeight.w700, color: c.textPrimary),
       iconTheme: IconThemeData(color: c.textSecondary),
     ),
     cardTheme: CardThemeData(
@@ -288,16 +271,8 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
     ),
     listTileTheme: ListTileThemeData(
       iconColor: c.textSecondary,
-      titleTextStyle: GoogleFonts.inter(
-        fontSize: 15,
-        fontWeight: FontWeight.w500,
-        color: c.textPrimary,
-      ),
-      subtitleTextStyle: GoogleFonts.inter(
-        fontSize: 13,
-        fontWeight: FontWeight.w400,
-        color: c.textSecondary,
-      ),
+      titleTextStyle: _inter(fontSize: 15, fontWeight: FontWeight.w500, color: c.textPrimary),
+      subtitleTextStyle: _inter(fontSize: 13, fontWeight: FontWeight.w400, color: c.textSecondary),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -311,7 +286,7 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
         minimumSize: const Size(0, 48),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+        textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -320,13 +295,13 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
         minimumSize: const Size(0, 48),
         side: BorderSide(color: c.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+        textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: c.accent,
-        textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+        textStyle: _inter(fontSize: 14, fontWeight: FontWeight.w600),
       ),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -339,11 +314,7 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
     chipTheme: ChipThemeData(
       backgroundColor: c.cardRaised,
       side: BorderSide(color: c.border),
-      labelStyle: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: c.textSecondary,
-      ),
+      labelStyle: _inter(fontSize: 12, fontWeight: FontWeight.w600, color: c.textSecondary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
     ),
     dialogTheme: DialogThemeData(
@@ -361,7 +332,7 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: isDark ? kCardDarkRaised : kTextPrimary,
-      contentTextStyle: GoogleFonts.inter(fontSize: 14, color: kWhite),
+      contentTextStyle: _inter(fontSize: 14, color: kWhite),
       actionTextColor: kTeal400,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
@@ -371,15 +342,11 @@ ThemeData _build(Brightness brightness, LedgableColors c) {
       fillColor: c.card,
       // The prototype left hint and label to the default, which on the dark
       // canvas came out below 4.5:1. Both are set explicitly.
-      hintStyle: GoogleFonts.inter(fontSize: 15, color: c.textTertiary),
-      labelStyle: GoogleFonts.inter(fontSize: 15, color: c.textSecondary),
-      floatingLabelStyle: GoogleFonts.inter(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: c.accent,
-      ),
-      helperStyle: GoogleFonts.inter(fontSize: 12, color: c.textSecondary),
-      errorStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: c.negative),
+      hintStyle: _inter(fontSize: 15, color: c.textTertiary),
+      labelStyle: _inter(fontSize: 15, color: c.textSecondary),
+      floatingLabelStyle: _inter(fontSize: 13, fontWeight: FontWeight.w600, color: c.accent),
+      helperStyle: _inter(fontSize: 12, color: c.textSecondary),
+      errorStyle: _inter(fontSize: 12, fontWeight: FontWeight.w500, color: c.negative),
       prefixIconColor: c.textSecondary,
       suffixIconColor: c.textSecondary,
       border: OutlineInputBorder(

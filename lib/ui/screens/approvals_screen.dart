@@ -251,7 +251,7 @@ class _BillCard extends StatelessWidget {
       title: bill.supplierName,
       subtitle: [
         bill.billNumber,
-        if (bill.dueDate != null) 'due ${Dates.relative(bill.dueDate).toLowerCase()}',
+        if (bill.dueDate != null) 'due ${Dates.relativeInline(bill.dueDate)}',
       ].join(' · '),
       amount: Money.format(bill.amountDue ?? bill.total),
       amountLabel: 'to pay',

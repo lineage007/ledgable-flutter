@@ -52,6 +52,18 @@ class Dates {
     return _full.format(value);
   }
 
+  /// [relative], but safe to drop into the middle of a sentence.
+  ///
+  /// Callers were lower-casing the whole of [relative] to get "due today" —
+  /// which also turned "15 Aug 2026" into "15 aug 2026". Only the word forms
+  /// are lower-cased here; a real date keeps its capital month.
+  static String relativeInline(DateTime? value, {DateTime? now}) {
+    final rendered = relative(value, now: now);
+    // A rendered date starts with a digit and contains a month abbreviation.
+    final isWordForm = !RegExp(r'\d{4}$').hasMatch(rendered);
+    return isWordForm ? rendered.toLowerCase() : rendered;
+  }
+
   /// How long ago, to the minute — for a "last updated 3 min ago" stamp on
   /// cached reads, which the plan requires never be presented as live.
   static String sinceShort(DateTime? value, {DateTime? now}) {
@@ -60,7 +72,7 @@ class Dates {
     if (delta.inSeconds < 45) return 'just now';
     if (delta.inMinutes < 60) return '${delta.inMinutes} min ago';
     if (delta.inHours < 24) return '${delta.inHours}h ago';
-    return relative(value, now: now).toLowerCase();
+    return relativeInline(value, now: now);
   }
 
   /// `2026-07` or an ISO instant from `Dashboard.monthlySeries` to `Jul`.

@@ -123,6 +123,15 @@ void main() {
       expect(Dates.relative(DateTime(2026, 8, 1), now: now), '1 Aug 2026');
     });
 
+    test('the inline form lowercases only the word forms, never a month', () {
+      final now = DateTime(2026, 9, 27, 12);
+      // "Due today" reads correctly mid-sentence…
+      expect(Dates.relativeInline(DateTime(2026, 9, 27), now: now), 'today');
+      expect(Dates.relativeInline(DateTime(2026, 9, 24), now: now), '3 days ago');
+      // …but "Due 15 aug 2026" does not.
+      expect(Dates.relativeInline(DateTime(2026, 8, 15), now: now), '15 Aug 2026');
+    });
+
     test('humanise keeps Australian tax initialisms upper-cased', () {
       expect(humanise('travel_expenses'), 'Travel expenses');
       expect(humanise('gst_free_sales'), 'GST free sales');

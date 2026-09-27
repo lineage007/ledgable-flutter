@@ -173,7 +173,7 @@ class _DeviceCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Last used ${Dates.sinceShort(device.lastSeenAt)} · '
-                  'added ${Dates.relative(device.createdAt).toLowerCase()}',
+                  'added ${Dates.relativeInline(device.createdAt)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (device.pushEnabled) ...[

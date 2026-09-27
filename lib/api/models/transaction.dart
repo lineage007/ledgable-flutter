@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 
+import '../../core/formatters.dart';
 import '../../core/money.dart';
 import 'page.dart';
 
@@ -134,18 +135,8 @@ class CategoryOption {
   /// the codes a business uses every week sit at the top of the picker.
   final int usageCount;
 
-  String get label => _humaniseCode(code);
-
-  static String _humaniseCode(String code) {
-    final spaced = code.replaceAll(RegExp(r'[_\-]+'), ' ').trim();
-    if (spaced.isEmpty) return code;
-    // A bare account code like "620" has nothing to title-case.
-    if (RegExp(r'^\d+$').hasMatch(spaced)) return code;
-    return spaced
-        .split(RegExp(r'\s+'))
-        .map(
-          (word) => word.isEmpty ? word : word[0].toUpperCase() + word.substring(1).toLowerCase(),
-        )
-        .join(' ');
-  }
+  /// Sentence case via the shared humaniser, so the picker and the rest of the
+  /// app agree — "Materials and parts", with GST and PAYG left upper-cased. A
+  /// bare account code like "620" has nothing to humanise and is shown as it is.
+  String get label => RegExp(r'^\d+$').hasMatch(code.trim()) ? code : humanise(code);
 }

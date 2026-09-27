@@ -38,20 +38,28 @@ class LedgerCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: colors.border),
           ),
+          // The accent stripe is positioned in a Stack rather than laid out as a
+          // stretched Row child. A Row with CrossAxisAlignment.stretch hands its
+          // children an infinite height constraint when the card itself has no
+          // bounded height — which is exactly the case inside a ListView — and
+          // that is an assertion failure, not a cosmetic problem. A Stack sizes
+          // to `content` and then fills the stripe to match it.
           child: accent == null
               ? content
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      width: 4,
-                      decoration: BoxDecoration(
-                        color: accent,
-                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    children: [
+                      content,
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 4,
+                        child: ColoredBox(color: accent!),
                       ),
-                    ),
-                    Expanded(child: content),
-                  ],
+                    ],
+                  ),
                 ),
         ),
       ),
@@ -132,11 +140,20 @@ class StatusPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[Icon(icon, size: 12, color: foreground), const SizedBox(width: 4)],
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: foreground, fontWeight: FontWeight.w600),
+          // Flexible, because a pill is often placed in a narrow column — the
+          // receivables tile on the dashboard is about 117px wide on a 390px
+          // handset — and a label like "$3,080 overdue" overflows it. Truncating
+          // is the right failure: the figure the pill sits under is the number
+          // that matters, and the pill is a qualifier on it.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: foreground, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
@@ -311,12 +328,15 @@ class DetailRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            value,
-            textAlign: TextAlign.right,
-            style: (emphasise ? theme.textTheme.titleMedium : theme.textTheme.bodyLarge)?.copyWith(
-              color: valueColor,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          // A label and a value that are both long — "PAYG withholding" beside a
+          // six-figure amount — need the value to be able to wrap rather than
+          // run off the card.
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: (emphasise ? theme.textTheme.titleMedium : theme.textTheme.bodyLarge)
+                  ?.copyWith(color: valueColor, fontFeatures: const [FontFeature.tabularFigures()]),
             ),
           ),
         ],

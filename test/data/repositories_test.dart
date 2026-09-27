@@ -199,8 +199,9 @@ void main() {
 
       expect(options.map((option) => option.code), ['fuel', 'tools_small_equipment']);
       expect(options.first.usageCount, 2);
+      // Sentence case, matching how the rest of the app renders a code.
       expect(options.first.label, 'Fuel');
-      expect(options.last.label, 'Tools Small Equipment');
+      expect(options.last.label, 'Tools small equipment');
     });
   });
 
@@ -235,6 +236,7 @@ void main() {
       expect(invoice.total, Decimal.parse('2750.00'));
       expect(invoice.status.label, 'Awaiting payment');
       expect(invoice.contactName, 'Harbour Cafe');
+      expect(invoice.amountDue, Decimal.parse('2750.00'));
     });
 
     test('createDraft sends integer cents and a date-only due date', () async {

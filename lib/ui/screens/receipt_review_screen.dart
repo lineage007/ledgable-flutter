@@ -332,7 +332,14 @@ class _FieldRow extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Text(label, style: theme.textTheme.bodyMedium),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
                 if (doubtful) ...[
                   const SizedBox(width: 6),
                   Icon(Icons.priority_high_rounded, size: 14, color: colors.warning),
@@ -341,24 +348,31 @@ class _FieldRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value,
-                style: (emphasise ? theme.textTheme.headlineSmall : theme.textTheme.bodyLarge)
-                    ?.copyWith(
-                      color: doubtful ? colors.warning : null,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-              ),
-              if (doubtful)
+          // Constrained: this column carries a figure, a "check this" caption and
+          // sometimes a GST-registration pill, and together they are wider than
+          // the space left beside the label on a 390px handset.
+          Flexible(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
                 Text(
-                  'Low confidence — check this',
-                  style: theme.textTheme.bodySmall?.copyWith(color: colors.warning),
+                  value,
+                  style: (emphasise ? theme.textTheme.headlineSmall : theme.textTheme.bodyLarge)
+                      ?.copyWith(
+                        color: doubtful ? colors.warning : null,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                 ),
-              if (trailing != null) ...[const SizedBox(height: 6), trailing!],
-            ],
+                if (doubtful)
+                  Text(
+                    'Low confidence — check this',
+                    textAlign: TextAlign.right,
+                    style: theme.textTheme.bodySmall?.copyWith(color: colors.warning),
+                  ),
+                if (trailing != null) ...[const SizedBox(height: 6), trailing!],
+              ],
+            ),
           ),
         ],
       ),
