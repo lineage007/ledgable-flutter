@@ -60,6 +60,10 @@ dependencies:
   # Receipt capture.
   image_picker: ^1.2.1
 
+  # Opening the web app for the things the mobile API cannot do — approving a
+  # pay run, editing an extraction, downloading a data export.
+  url_launcher: ^6.3.1
+
   # MediaType for the receipt upload part. A transitive dependency of dio, but
   # declared because this package imports it directly.
   http_parser: ^4.1.2
