@@ -1,4 +1,4 @@
-package co.ledgable.ledgable_app
+package co.ledgable.app
 
 import io.flutter.embedding.android.FlutterActivity
 
