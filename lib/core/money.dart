@@ -84,10 +84,13 @@ class Money {
   /// Dashboard KPIs arrive as JSON numbers. They are display aggregates, so a
   /// double is acceptable here and only here. [whole] drops the cents, which
   /// is what a KPI tile wants once a figure runs to five digits.
-  static String formatDouble(num? value, {bool whole = false}) {
+  static String formatDouble(num? value, {bool whole = false, bool showSign = false}) {
     if (value == null) return '—';
-    if (whole || value.abs() >= 100000) return _audWhole.format(value);
-    return _audDouble.format(value);
+    final formatted = whole || value.abs() >= 100000
+        ? _audWhole.format(value)
+        : _audDouble.format(value);
+    // Same rule as [format]: only a positive figure gets a "+".
+    return showSign && value > 0 ? '+$formatted' : formatted;
   }
 
   /// A signed percentage for trend labels: `+12.4%`, `-3.0%`, `—` when the

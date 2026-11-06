@@ -581,7 +581,7 @@ class _ActivityRow extends StatelessWidget {
                 '${Money.formatDouble(item.amount.abs())}',
             excludeSemantics: true,
             child: Text(
-              '${item.isIncome ? '+' : ''}${Money.formatDouble(item.amount.abs())}',
+              Money.formatDouble(item.amount.abs(), showSign: item.isIncome),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: item.isIncome ? colors.positive : colors.textPrimary,
