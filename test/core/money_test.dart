@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
@@ -130,6 +131,15 @@ void main() {
       expect(Dates.relativeInline(DateTime(2026, 9, 24), now: now), '3 days ago');
       // …but "Due 15 aug 2026" does not.
       expect(Dates.relativeInline(DateTime(2026, 8, 15), now: now), '15 Aug 2026');
+    });
+
+    test('without an explicit now, relative dates follow the ambient clock', () {
+      // Screens call these with no `now`, so the goldens rely on this to pin
+      // the day. If it reads the wall clock again they drift a week later.
+      withClock(Clock.fixed(DateTime(2026, 9, 27, 12)), () {
+        expect(Dates.relative(DateTime(2026, 9, 24)), '3 days ago');
+        expect(Dates.sinceShort(DateTime(2026, 9, 27, 11, 50)), '10 min ago');
+      });
     });
 
     test('humanise keeps Australian tax initialisms upper-cased', () {
