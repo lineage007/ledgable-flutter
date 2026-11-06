@@ -191,17 +191,29 @@ class _TransactionReviewScreenState extends ConsumerState<TransactionReviewScree
   ) async {
     final previous = result.previousCategoryCode;
     if (previous == null) {
-      // Only the local queue changes here. If this screen has gone, its next
-      // build reloads the queue from the server, so there is nothing to do.
-      if (!mounted) return;
+      final label = CategoryOption(code: result.categoryCode, usageCount: 0).label;
+      // Only the local queue can change here, and with the screen gone there
+      // is no queue to put it back in. Say so rather than doing nothing.
+      if (!mounted) {
+        _showOn(
+          messenger,
+          SnackBar(
+            content: Text(
+              'It is still categorised as $label. There was no earlier category '
+              'to put back, so change it on the web.',
+            ),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+        return;
+      }
       setState(() {
         _queue.insert(0, transaction);
         _total++;
       });
       showSuccessToast(
         context,
-        'Back in the queue. It is still categorised as '
-        '${CategoryOption(code: result.categoryCode, usageCount: 0).label} until you change it.',
+        'Back in the queue. It is still categorised as $label until you change it.',
       );
       return;
     }
