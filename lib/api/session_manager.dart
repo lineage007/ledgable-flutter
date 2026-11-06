@@ -74,9 +74,11 @@ class SessionManager {
   /// Read the keychain once per process. Called by the splash screen.
   Future<AuthTokens?> restore() async {
     if (_restored) return _tokens;
-    _restored = true;
     final stored = await _store.read();
     _workspaceId = await _store.readWorkspaceId();
+    // Only once the keychain has actually been read: a read that throws (an
+    // iOS keychain still locked after a reboot, say) must be retryable.
+    _restored = true;
     if (stored == null) return null;
     // A dead refresh token cannot be revived, so there is no point starting the
     // app as if signed in and failing on the first call.
