@@ -142,6 +142,25 @@ void main() {
       });
     });
 
+    test('day counts survive a daylight saving change', () {
+      // Sydney clocks go forward on 4 Oct 2026, so local midnight 4 Oct to
+      // local midnight 5 Oct is 23 hours. Counting elapsed hours called
+      // yesterday "Today". Run under TZ=Australia/Sydney to exercise it; in a
+      // zone without DST it passes either way.
+      final now = DateTime(2026, 10, 5, 9);
+      expect(Dates.relative(DateTime(2026, 10, 4, 9), now: now), 'Yesterday');
+      expect(Dates.relative(DateTime(2026, 10, 1), now: now), '4 days ago');
+      // And back: 5 Apr 2026 is 25 hours long.
+      expect(Dates.relative(DateTime(2026, 4, 7), now: DateTime(2026, 4, 5, 9)), 'In 2 days');
+    });
+
+    test('adding days lands on the same calendar day across DST', () {
+      // 14-day terms from 1 Apr 2026 cross the 5 Apr change. Adding 14×24h to
+      // local midnight gave 11pm on 14 Apr: due a day early.
+      expect(Dates.addDays(DateTime(2026, 4, 1), 14), DateTime(2026, 4, 15));
+      expect(Dates.addDays(DateTime(2026, 9, 30, 15, 30), 14), DateTime(2026, 10, 14));
+    });
+
     test('humanise keeps Australian tax initialisms upper-cased', () {
       expect(humanise('travel_expenses'), 'Travel expenses');
       expect(humanise('gst_free_sales'), 'GST free sales');
