@@ -195,15 +195,25 @@ class SessionManager {
   /// server-side revocation is the caller's job — this only clears the device.
   Future<void> signOutLocally(SignedOutReason reason) => _endSession(reason);
 
+  /// Clears the credentials **without** announcing a sign-out.
+  ///
+  /// For account deletion: announcing it moves the router to sign-in at once,
+  /// which tears down the screen and the dialog carrying the deletion
+  /// reference before the user can read it. The caller announces the
+  /// sign-out itself once the reference has been seen.
+  Future<void> clearLocally() async {
+    _tokens = null;
+    _workspaceId = null;
+    await _store.clear();
+  }
+
   Future<void> _endSession(SignedOutReason reason) async {
     if (_tokens == null && reason != SignedOutReason.userInitiated) {
       // Already torn down; a second 401 from an in-flight request should not
       // push the user to sign-in twice.
       return;
     }
-    _tokens = null;
-    _workspaceId = null;
-    await _store.clear();
+    await clearLocally();
     if (!_signedOut.isClosed) _signedOut.add(reason);
   }
 

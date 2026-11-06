@@ -147,7 +147,7 @@ Future<void> _openOnWeb(BuildContext context, String deepLink) async {
   final url = Uri.parse(Env.webUrl(deepLink));
   final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
   if (!opened && context.mounted) {
-    showErrorToast(context, StateError('Could not open $url'));
+    showErrorMessage(context, 'Could not open $url');
   }
 }
 

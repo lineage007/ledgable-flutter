@@ -101,7 +101,7 @@ class _NewInvoiceScreenState extends ConsumerState<NewInvoiceScreen> {
   Future<void> _submit() async {
     final contact = _contact;
     if (contact == null) {
-      showErrorToast(context, StateError('Choose a customer first.'));
+      showErrorMessage(context, 'Choose a customer first.');
       return;
     }
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -112,12 +112,12 @@ class _NewInvoiceScreenState extends ConsumerState<NewInvoiceScreen> {
       if (draft != null) drafts.add(draft);
     }
     if (drafts.isEmpty) {
-      showErrorToast(context, StateError('Add at least one line with an amount.'));
+      showErrorMessage(context, 'Add at least one line with an amount.');
       return;
     }
 
     if (_effectiveDueDate.isBefore(DateTime(_issueDate.year, _issueDate.month, _issueDate.day))) {
-      showErrorToast(context, StateError('The due date cannot be before the invoice date.'));
+      showErrorMessage(context, 'The due date cannot be before the invoice date.');
       return;
     }
 
@@ -146,12 +146,10 @@ class _NewInvoiceScreenState extends ConsumerState<NewInvoiceScreen> {
       context.pushReplacement(Routes.invoiceDetail(created.id));
     } on ArgumentError {
       if (!mounted) return;
-      showErrorToast(
+      showErrorMessage(
         context,
-        StateError(
-          'One of the amounts has more than two decimal places. '
-          'Round it to the cent and try again.',
-        ),
+        'One of the amounts has more than two decimal places. '
+        'Round it to the cent and try again.',
       );
     } on Object catch (error) {
       if (!mounted) return;
