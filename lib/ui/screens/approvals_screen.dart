@@ -304,7 +304,8 @@ class _LeaveCard extends StatelessWidget {
     final sameDay =
         leave.startDate != null &&
         leave.endDate != null &&
-        leave.startDate!.difference(leave.endDate!).inDays == 0;
+        // Calendar days, not elapsed hours: 4 to 5 Oct is 23 hours in Sydney.
+        DateUtils.isSameDay(leave.startDate, leave.endDate);
 
     return _ApprovalCard(
       icon: Icons.event_busy_outlined,
