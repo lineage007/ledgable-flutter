@@ -33,5 +33,9 @@ jobs:
       # Goldens compare pixels and are rendered on macOS; Linux rasterises text
       # differently, so they are excluded here (see dart_test.yaml) and run
       # locally with `flutter test --tags golden`.
+      # Sydney time, so date logic runs in a zone with daylight saving, as it
+      # does for most of the app's users.
       - name: Test
         run: flutter test --exclude-tags golden
+        env:
+          TZ: Australia/Sydney
