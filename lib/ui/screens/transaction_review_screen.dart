@@ -435,11 +435,19 @@ class _TransactionCard extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               else
-                Text(
-                  Money.format(transaction.absAmount),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: isIncome ? colors.positive : colors.textPrimary,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                // Income carries a "+" and both are labelled for screen
+                // readers, so money in and out are not told apart by colour
+                // alone.
+                Semantics(
+                  label: '${isIncome ? 'Money in' : 'Money out'} '
+                      '${Money.format(transaction.absAmount)}',
+                  excludeSemantics: true,
+                  child: Text(
+                    Money.format(transaction.absAmount, showSign: isIncome),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: isIncome ? colors.positive : colors.textPrimary,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
             ],

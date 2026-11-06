@@ -574,12 +574,19 @@ class _ActivityRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            Money.formatDouble(item.amount.abs()),
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: item.isIncome ? colors.positive : colors.textPrimary,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          // A "+" and a spoken label, so money in is not told apart by colour
+          // alone.
+          Semantics(
+            label: '${item.isIncome ? 'Money in' : 'Money out'} '
+                '${Money.formatDouble(item.amount.abs())}',
+            excludeSemantics: true,
+            child: Text(
+              '${item.isIncome ? '+' : ''}${Money.formatDouble(item.amount.abs())}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: item.isIncome ? colors.positive : colors.textPrimary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ],
