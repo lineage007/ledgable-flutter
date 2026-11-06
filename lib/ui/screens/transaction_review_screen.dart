@@ -147,14 +147,22 @@ class _TransactionReviewScreenState extends ConsumerState<TransactionReviewScree
       // accept it without a round trip.
       _rememberCategory(categoryCode);
 
-      ScaffoldMessenger.of(context)
+      // The snackbar outlives this screen (the shell rebuilds a tab on every
+      // switch), so Undo must not depend on it: the repository and messenger
+      // are captured now, while `ref` and `context` are still valid.
+      final repository = _repository;
+      final messenger = ScaffoldMessenger.of(context);
+      messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
             content: Text(
               '${transaction.title} → ${CategoryOption(code: categoryCode, usageCount: 0).label}',
             ),
-            action: SnackBarAction(label: 'Undo', onPressed: () => _undo(transaction, result)),
+            action: SnackBarAction(
+              label: 'Undo',
+              onPressed: () => _undo(transaction, result, repository, messenger),
+            ),
           ),
         );
     } on Object catch (error) {
@@ -175,33 +183,67 @@ class _TransactionReviewScreenState extends ConsumerState<TransactionReviewScree
   /// Undo by categorising again — the same operation in reverse, which is what
   /// makes it safe. When there was no prior category the row simply returns to
   /// the queue, because the API has no "uncategorise" call.
-  Future<void> _undo(TransactionRecord transaction, CategorisationResult result) async {
+  Future<void> _undo(
+    TransactionRecord transaction,
+    CategorisationResult result,
+    TransactionsRepository repository,
+    ScaffoldMessengerState messenger,
+  ) async {
     final previous = result.previousCategoryCode;
     if (previous == null) {
+      final label = CategoryOption(code: result.categoryCode, usageCount: 0).label;
+      // Only the local queue can change here, and with the screen gone there
+      // is no queue to put it back in. Say so rather than doing nothing.
+      if (!mounted) {
+        _showOn(
+          messenger,
+          SnackBar(
+            content: Text(
+              'It is still categorised as $label. There was no earlier category '
+              'to put back, so change it on the web.',
+            ),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+        return;
+      }
       setState(() {
         _queue.insert(0, transaction);
         _total++;
       });
-      if (!mounted) return;
       showSuccessToast(
         context,
-        'Back in the queue. It is still categorised as '
-        '${CategoryOption(code: result.categoryCode, usageCount: 0).label} until you change it.',
+        'Back in the queue. It is still categorised as $label until you change it.',
       );
       return;
     }
 
     try {
-      await _repository.categorise(transactionId: transaction.id, categoryCode: previous);
-      if (!mounted) return;
-      showSuccessToast(
-        context,
-        'Put back to ${CategoryOption(code: previous, usageCount: 0).label}.',
+      await repository.categorise(transactionId: transaction.id, categoryCode: previous);
+      _showOn(
+        messenger,
+        SnackBar(
+          content: Text('Put back to ${CategoryOption(code: previous, usageCount: 0).label}.'),
+          duration: const Duration(seconds: 4),
+        ),
       );
     } on Object catch (error) {
-      if (!mounted) return;
-      showErrorToast(context, error);
+      if (mounted) {
+        showErrorToast(context, error);
+      } else {
+        _showOn(
+          messenger,
+          const SnackBar(content: Text('Could not undo that. Change the category on the web.')),
+        );
+      }
     }
+  }
+
+  static void _showOn(ScaffoldMessengerState messenger, SnackBar snackBar) {
+    if (!messenger.mounted) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
   }
 
   void _rememberCategory(String code) {
