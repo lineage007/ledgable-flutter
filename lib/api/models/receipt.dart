@@ -145,25 +145,41 @@ class Extraction {
   bool get hasGstMismatch =>
       vendorGstRegistered == false && taxAmount != null && taxAmount != Decimal.zero;
 
-  /// The GST a 10% rate implies for this total, used to flag a reading that is
-  /// internally inconsistent. Australian GST is 1/11th of a GST-inclusive
-  /// total, not 10% of it — 10% of the inclusive figure overstates the credit.
+  /// The GST a 10% rate implies for this total if every item on it is taxable,
+  /// rounded to the cent. Australian GST is 1/11th of a GST-inclusive total,
+  /// not 10% of it, which overstates the credit. Because GST-free items (basic
+  /// food, for one) carry none, this is also the most GST the total can hold.
   Decimal? get impliedGst {
     final total = totalAmount;
     if (total == null || total == Decimal.zero) return null;
-    return (total / Decimal.fromInt(11)).toDecimal(scaleOnInfinitePrecision: 2);
+    return (total / Decimal.fromInt(11)).toDecimal(scaleOnInfinitePrecision: 10).round(scale: 2);
   }
 
-  /// True when the GST read off the receipt is more than five cents away from
-  /// one eleventh of the total. Five cents absorbs the rounding a till does
-  /// per line without flagging every receipt.
-  bool get gstLooksOff {
+  /// Five cents absorbs the rounding a till does per line without flagging
+  /// every receipt.
+  static final _gstTolerance = Decimal.parse('0.05');
+
+  /// More GST than one eleventh of the total: impossible, so a misreading or a
+  /// till charging 10% on top of an inclusive price.
+  bool get gstAboveMaximum {
     final read = taxAmount;
     final implied = impliedGst;
     if (read == null || implied == null || read == Decimal.zero) return false;
-    final gap = (read - implied).abs();
-    return gap > Decimal.parse('0.05');
+    return read - implied > _gstTolerance;
   }
+
+  /// Less GST than one eleventh of the total. Normal when some items are
+  /// GST-free, so the screen words this as a question, not an error.
+  bool get gstBelowFullRate {
+    final read = taxAmount;
+    final implied = impliedGst;
+    if (read == null || implied == null || read == Decimal.zero) return false;
+    return implied - read > _gstTolerance;
+  }
+
+  /// True when the GST read off the receipt is more than five cents away from
+  /// one eleventh of the total, in either direction.
+  bool get gstLooksOff => gstAboveMaximum || gstBelowFullRate;
 
   factory Extraction.fromJson(Map<String, dynamic> json) => Extraction(
     id: asString(json['id']),
