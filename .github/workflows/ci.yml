@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, cowork/20260927-ledgable-app]
   pull_request:
 
 permissions:
