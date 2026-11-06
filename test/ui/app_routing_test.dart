@@ -233,6 +233,12 @@ void main() {
     expect(find.byType(SignInScreen), findsNothing);
     expect(store.clearCount, greaterThan(0));
     expect(client.session.hasSession, isFalse);
+
+    // Closing the receipt is what signs the device out.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Done'));
+    await settleWithNetwork(tester);
+    expect(find.byType(SignInScreen), findsOneWidget);
+    expect(find.text('Your account has been deleted.'), findsOneWidget);
   });
 }
 

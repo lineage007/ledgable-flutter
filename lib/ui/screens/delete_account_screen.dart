@@ -112,6 +112,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       // sign-out. Show the reference before the router moves to sign-in,
       // because after this response there is no account left to look it up
       // from. The sign-out happens even if this screen has gone meanwhile.
+      // Until then the state is still signed in with no tokens; nothing
+      // refreshes behind a modal on a root route, and a stray 401 meanwhile
+      // only shows a toast, so the window is harmless.
       if (mounted) {
         await showDialog<void>(
           context: context,
