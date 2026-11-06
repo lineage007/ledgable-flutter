@@ -1,6 +1,5 @@
 import '../api/api_client.dart';
 import '../api/models/account_deletion.dart';
-import '../api/session_manager.dart';
 
 class AccountRepository {
   AccountRepository(this._client);
@@ -45,7 +44,9 @@ class AccountRepository {
       },
     );
     final result = AccountDeletionResult.fromJson(body);
-    await _client.session.signOutLocally(SignedOutReason.accountDeleted);
+    // Cleared, not signed out: the screen still has to show the deletion
+    // reference, and it announces the sign-out once that has been read.
+    await _client.session.clearLocally();
     return result;
   }
 }

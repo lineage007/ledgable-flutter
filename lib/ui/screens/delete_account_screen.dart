@@ -99,6 +99,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       _error = null;
     });
 
+    // Read before the await: `ref` cannot be used once the screen is disposed.
+    final auth = ref.read(authControllerProvider.notifier);
     try {
       final result = await ref
           .read(accountRepositoryProvider)
@@ -106,19 +108,20 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             password: _passwordController.text,
             exportAcknowledged: _exportAcknowledged,
           );
-      if (!mounted) return;
-      // The repository already cleared the keychain. Show the reference before
-      // the router moves to sign-in, because after this response there is no
-      // account left to look it up from.
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) => _DeletionReceiptDialog(result: result),
-      );
-      if (!mounted) return;
+      // The repository already cleared the keychain without announcing a
+      // sign-out. Show the reference before the router moves to sign-in,
+      // because after this response there is no account left to look it up
+      // from. The sign-out happens even if this screen has gone meanwhile.
+      if (mounted) {
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => _DeletionReceiptDialog(result: result),
+        );
+      }
       // _deleting stays true on purpose: the account is gone, and re-enabling
       // the button would offer a second attempt that can only fail.
-      ref.read(authControllerProvider.notifier).markAccountDeleted();
+      auth.markAccountDeleted();
     } on Object catch (error) {
       if (!mounted) return;
       setState(() {
@@ -281,7 +284,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   if (opened) {
                     setState(() => _exportAcknowledged = true);
                   } else {
-                    showErrorToast(context, StateError('Could not open $url'));
+                    showErrorMessage(context, 'Could not open $url');
                   }
                 },
                 icon: const Icon(Icons.open_in_new_rounded, size: 16),

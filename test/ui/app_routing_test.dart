@@ -171,6 +171,69 @@ void main() {
     expect(find.byType(SignInScreen), findsOneWidget);
     expect(find.textContaining('session expired'), findsOneWidget);
   });
+
+  testWidgets('deleting the account shows the reference before leaving for sign in', (
+    tester,
+  ) async {
+    // The screen test wraps the screen without the router, so it cannot see
+    // the router tearing the receipt dialog down. This one boots the real app.
+    store = InMemoryTokenStore(tokens: liveTokens(), workspaceId: 'ws-1');
+    http.on('GET', '/me', [FakeReply(200, mePayload())]);
+    http.on('GET', '/dashboard', [FakeReply(200, dashboardPayload())]);
+    http.on('GET', '/account', [
+      FakeReply(200, {
+        'retentionYears': 7,
+        'activeDeviceCount': 1,
+        'totals': {'untouched': 0, 'transferred': 0, 'retained': 0, 'deleted': 1},
+        'workspaces': [
+          {
+            'workspaceId': 'ws-1',
+            'name': 'Salt & Stone Pty Ltd',
+            'outcome': 'deleted',
+            'reason': 'No financial records, so it is removed.',
+          },
+        ],
+        'workspacesWithLiveSubscription': <Map<String, dynamic>>[],
+        'exportAvailableAt': '/settings/backups',
+      }),
+    ]);
+    http.on('DELETE', '/account', [
+      FakeReply(200, {
+        'deleted': true,
+        'reference': 'LGD-7Q2F4K8M',
+        'retainedWorkspaces': <Map<String, dynamic>>[],
+        'devicesRevoked': 1,
+        'billingCancellations': <Map<String, dynamic>>[],
+      }),
+    ]);
+
+    tester.view.physicalSize = const Size(390 * 3, 2400 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(bootApp());
+    await settleWithNetwork(tester);
+    final container = ProviderScope.containerOf(tester.element(find.byType(DashboardScreen)));
+    container.read(routerProvider).push(Routes.deleteAccount);
+    await settleWithNetwork(tester);
+
+    await tester.tap(find.byType(CheckboxListTile).last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Your password'), 'hunter2');
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Delete my account'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Delete it'));
+    await pumpNetwork(tester);
+    await tester.pump(const Duration(seconds: 1));
+
+    // After this response there is no account left to look the reference up
+    // from, so it has to still be on screen, and the keychain already empty.
+    expect(find.text('LGD-7Q2F4K8M'), findsOneWidget);
+    expect(find.byType(SignInScreen), findsNothing);
+    expect(store.clearCount, greaterThan(0));
+    expect(client.session.hasSession, isFalse);
+  });
 }
 
 /// Mirrors what `main()` does: kicks off the bootstrap, then shows the app.
