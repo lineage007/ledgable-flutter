@@ -31,6 +31,25 @@ void main() {
     expect(find.text('3 invoices'), findsOneWidget);
   });
 
+  testWidgets('money in is marked by more than colour', (tester) async {
+    harness.http.on('GET', '/dashboard', [FakeReply(200, dashboardPayload())]);
+    final semantics = tester.ensureSemantics();
+
+    tester.view.physicalSize = const Size(390 * 3, 2400 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(harness.wrap(const DashboardScreen(), me: testMe()));
+    await tester.pumpAndSettle();
+
+    // Income gets a "+", expenses stay unsigned, and a screen reader hears
+    // which is which rather than two identical figures.
+    expect(find.text(r'+$2,750.00'), findsOneWidget);
+    expect(find.text(r'$184.30'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'Money in \$2,750\.00')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'Money out \$184\.30')), findsOneWidget);
+    semantics.dispose();
+  });
+
   testWidgets('labels the financial year and the three FY figures', (tester) async {
     harness.http.on('GET', '/dashboard', [FakeReply(200, dashboardPayload())]);
 
