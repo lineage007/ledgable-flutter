@@ -9,6 +9,7 @@ import '../api/models/invoice.dart';
 import '../api/models/page.dart';
 import '../api/models/session_models.dart';
 import '../api/session_manager.dart';
+import '../api/token_store.dart';
 import '../data/account_repository.dart';
 import '../data/approvals_repository.dart';
 import '../data/auth_repository.dart';
@@ -144,7 +145,17 @@ class AuthController extends StateNotifier<AuthState> {
   /// Called once at startup: restore credentials, then read `/me`.
   Future<void> bootstrap() async {
     state = const AuthState.restoring();
-    final tokens = await _session.restore();
+    final AuthTokens? tokens;
+    try {
+      tokens = await _session.restore();
+    } on Object {
+      // Uncaught, this left the splash spinning with no way forward.
+      state = const AuthState(
+        stage: AuthStage.restoring,
+        bootstrapError: 'Could not read your saved sign-in on this device. Try again.',
+      );
+      return;
+    }
     if (tokens == null) {
       state = const AuthState(stage: AuthStage.signedOut);
       return;

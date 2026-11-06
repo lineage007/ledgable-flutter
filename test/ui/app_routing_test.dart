@@ -171,6 +171,34 @@ void main() {
     expect(find.byType(SignInScreen), findsOneWidget);
     expect(find.textContaining('session expired'), findsOneWidget);
   });
+
+  testWidgets('a keychain that cannot be read offers a retry instead of spinning', (tester) async {
+    final flaky = _FlakyReadStore(InMemoryTokenStore(tokens: liveTokens(), workspaceId: 'ws-1'));
+    store = flaky.inner;
+    http.on('GET', '/me', [FakeReply(200, mePayload())]);
+    http.on('GET', '/dashboard', [FakeReply(200, dashboardPayload())]);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiClientProvider.overrideWithValue(
+            ApiClient(store: flaky, baseUrl: 'https://example.test/api/mobile/v1')
+              ..useAdapter(http),
+          ),
+        ],
+        child: const _BootHarness(),
+      ),
+    );
+    await settleWithNetwork(tester);
+
+    expect(find.textContaining('Could not read your saved sign-in'), findsOneWidget);
+    expect(find.text('Try again'), findsOneWidget);
+
+    // The second read succeeds, and the retry really reads it again.
+    await tester.tap(find.text('Try again'));
+    await settleWithNetwork(tester);
+    expect(find.byType(DashboardScreen), findsOneWidget);
+  });
 }
 
 /// Mirrors what `main()` does: kicks off the bootstrap, then shows the app.
@@ -192,4 +220,34 @@ class _BootHarnessState extends ConsumerState<_BootHarness> {
 
   @override
   Widget build(BuildContext context) => const LedgableApp();
+}
+
+/// Throws on the first keychain read, like an iOS keychain that is still locked
+/// straight after a reboot, then behaves.
+class _FlakyReadStore implements TokenStore {
+  _FlakyReadStore(this.inner);
+
+  final InMemoryTokenStore inner;
+  var _reads = 0;
+
+  @override
+  Future<AuthTokens?> read() async {
+    if (_reads++ == 0) throw Exception('errSecInteractionNotAllowed');
+    return inner.read();
+  }
+
+  @override
+  Future<void> save(AuthTokens tokens) => inner.save(tokens);
+
+  @override
+  Future<void> clear() => inner.clear();
+
+  @override
+  Future<String> installId() => inner.installId();
+
+  @override
+  Future<String?> readWorkspaceId() => inner.readWorkspaceId();
+
+  @override
+  Future<void> saveWorkspaceId(String? workspaceId) => inner.saveWorkspaceId(workspaceId);
 }
