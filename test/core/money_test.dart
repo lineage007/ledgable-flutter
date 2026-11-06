@@ -150,8 +150,8 @@ void main() {
       final now = DateTime(2026, 10, 5, 9);
       expect(Dates.relative(DateTime(2026, 10, 4, 9), now: now), 'Yesterday');
       expect(Dates.relative(DateTime(2026, 10, 1), now: now), '4 days ago');
-      // And back: 5 Apr 2026 is 25 hours long.
-      expect(Dates.relative(DateTime(2026, 4, 7), now: DateTime(2026, 4, 5, 9)), 'In 2 days');
+      // Forward across the same change: 3 Oct to 5 Oct is 47 hours.
+      expect(Dates.relative(DateTime(2026, 10, 5), now: DateTime(2026, 10, 3, 9)), 'In 2 days');
     });
 
     test('adding days lands on the same calendar day across DST', () {
