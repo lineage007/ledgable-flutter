@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -50,7 +51,7 @@ class _DashboardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kpis = dashboard.kpis;
-    final fyLabel = Dates.financialYearLabel(DateTime.now());
+    final fyLabel = Dates.financialYearLabel(clock.now());
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -574,12 +575,19 @@ class _ActivityRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            Money.formatDouble(item.amount.abs()),
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: item.isIncome ? colors.positive : colors.textPrimary,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          // A "+" and a spoken label, so money in is not told apart by colour
+          // alone.
+          Semantics(
+            label: '${item.isIncome ? 'Money in' : 'Money out'} '
+                '${Money.formatDouble(item.amount.abs())}',
+            excludeSemantics: true,
+            child: Text(
+              Money.formatDouble(item.amount.abs(), showSign: item.isIncome),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: item.isIncome ? colors.positive : colors.textPrimary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
@@ -130,6 +131,34 @@ void main() {
       expect(Dates.relativeInline(DateTime(2026, 9, 24), now: now), '3 days ago');
       // …but "Due 15 aug 2026" does not.
       expect(Dates.relativeInline(DateTime(2026, 8, 15), now: now), '15 Aug 2026');
+    });
+
+    test('without an explicit now, relative dates follow the ambient clock', () {
+      // Screens call these with no `now`, so the goldens rely on this to pin
+      // the day. If it reads the wall clock again they drift a week later.
+      withClock(Clock.fixed(DateTime(2026, 9, 27, 12)), () {
+        expect(Dates.relative(DateTime(2026, 9, 24)), '3 days ago');
+        expect(Dates.sinceShort(DateTime(2026, 9, 27, 11, 50)), '10 min ago');
+      });
+    });
+
+    test('day counts survive a daylight saving change', () {
+      // Sydney clocks go forward on 4 Oct 2026, so local midnight 4 Oct to
+      // local midnight 5 Oct is 23 hours. Counting elapsed hours called
+      // yesterday "Today". Run under TZ=Australia/Sydney to exercise it; in a
+      // zone without DST it passes either way.
+      final now = DateTime(2026, 10, 5, 9);
+      expect(Dates.relative(DateTime(2026, 10, 4, 9), now: now), 'Yesterday');
+      expect(Dates.relative(DateTime(2026, 10, 1), now: now), '4 days ago');
+      // Forward across the same change: 3 Oct to 5 Oct is 47 hours.
+      expect(Dates.relative(DateTime(2026, 10, 5), now: DateTime(2026, 10, 3, 9)), 'In 2 days');
+    });
+
+    test('adding days lands on the same calendar day across DST', () {
+      // 14-day terms from 1 Apr 2026 cross the 5 Apr change. Adding 14×24h to
+      // local midnight gave 11pm on 14 Apr: due a day early.
+      expect(Dates.addDays(DateTime(2026, 4, 1), 14), DateTime(2026, 4, 15));
+      expect(Dates.addDays(DateTime(2026, 9, 30, 15, 30), 14), DateTime(2026, 10, 14));
     });
 
     test('humanise keeps Australian tax initialisms upper-cased', () {

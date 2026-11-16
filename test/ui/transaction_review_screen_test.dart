@@ -40,6 +40,22 @@ void main() {
     expect(find.text(r'$1,342.90'), findsOneWidget);
   });
 
+  testWidgets('a refund in the queue is marked as money in by more than colour', (tester) async {
+    final queue = reviewQueuePayload();
+    final rows = queue['transactions'] as List;
+    rows[0] = {...rows[0] as Map<String, dynamic>, 'total': 4500, 'type': 'income'};
+    scriptQueue(queue: queue);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(harness.wrap(const TransactionReviewScreen(), me: testMe()));
+    await tester.pumpAndSettle();
+
+    expect(find.text(r'+$45.00'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'Money in \$45\.00')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'Money out \$1,342\.90')), findsOneWidget);
+    semantics.dispose();
+  });
+
   testWidgets('a swipe right files the transaction under the suggested category', (tester) async {
     scriptQueue();
     harness.http.on('POST', '/transactions/txn-a/categorise', [
@@ -63,6 +79,58 @@ void main() {
     // Removed from the queue, and the count follows.
     expect(find.text('Officeworks'), findsNothing);
     expect(find.text('2 to sort'), findsOneWidget);
+  });
+
+  testWidgets('undo still works after switching tab while the snackbar shows', (tester) async {
+    // The shell rebuilds a tab's screen from scratch on every switch, but the
+    // snackbar lives on the app's messenger and outlasts it. Tapping Undo then
+    // ran setState and ref on a disposed screen: it threw and undid nothing.
+    scriptQueue();
+    harness.http.on('POST', '/transactions/txn-a/categorise', [
+      FakeReply(200, {
+        'transactionId': 'txn-a',
+        'previousCategoryCode': 'general_expenses',
+        'categoryCode': 'materials_and_parts',
+      }),
+      FakeReply(200, {
+        'transactionId': 'txn-a',
+        'previousCategoryCode': 'materials_and_parts',
+        'categoryCode': 'general_expenses',
+      }),
+    ]);
+    final onReviewTab = ValueNotifier(true);
+    addTearDown(onReviewTab.dispose);
+
+    await tester.pumpWidget(
+      harness.wrap(
+        Scaffold(
+          body: ValueListenableBuilder<bool>(
+            valueListenable: onReviewTab,
+            builder: (_, showReview, _) =>
+                showReview ? const TransactionReviewScreen() : const Text('Another tab'),
+          ),
+        ),
+        me: testMe(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.text('Officeworks'), const Offset(500, 0));
+    await settleWithNetwork(tester);
+    expect(find.text('Undo'), findsOneWidget);
+
+    onReviewTab.value = false;
+    await tester.pump();
+    expect(find.text('Another tab'), findsOneWidget);
+
+    await tester.tap(find.text('Undo'));
+    await settleWithNetwork(tester);
+
+    expect(tester.takeException(), isNull);
+    final calls = harness.http.requestsTo('POST', '/transactions/txn-a/categorise');
+    expect(calls, hasLength(2));
+    expect(calls.last.json!['categoryCode'], 'general_expenses');
+    expect(find.textContaining('Put back to General expenses'), findsOneWidget);
   });
 
   testWidgets('offers an undo that categorises back to the prior code', (tester) async {

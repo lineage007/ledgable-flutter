@@ -147,7 +147,7 @@ Future<void> _openOnWeb(BuildContext context, String deepLink) async {
   final url = Uri.parse(Env.webUrl(deepLink));
   final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
   if (!opened && context.mounted) {
-    showErrorToast(context, StateError('Could not open $url'));
+    showErrorMessage(context, 'Could not open $url');
   }
 }
 
@@ -304,7 +304,8 @@ class _LeaveCard extends StatelessWidget {
     final sameDay =
         leave.startDate != null &&
         leave.endDate != null &&
-        leave.startDate!.difference(leave.endDate!).inDays == 0;
+        // Calendar days, not elapsed hours: 4 to 5 Oct is 23 hours in Sydney.
+        DateUtils.isSameDay(leave.startDate, leave.endDate);
 
     return _ApprovalCard(
       icon: Icons.event_busy_outlined,
