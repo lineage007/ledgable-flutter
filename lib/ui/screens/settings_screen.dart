@@ -198,7 +198,7 @@ class SettingsScreen extends ConsumerWidget {
   static Future<void> _open(BuildContext context, String url) async {
     final opened = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     if (!opened && context.mounted) {
-      showErrorToast(context, StateError('Could not open $url'));
+      showErrorMessage(context, 'Could not open $url');
     }
   }
 }

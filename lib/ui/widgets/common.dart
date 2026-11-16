@@ -363,11 +363,26 @@ Future<void> refreshQuietly(Future<Object?> Function() reload) async {
 }
 
 /// Shows an error to the user in the visible layer, never behind a modal.
+///
+/// Only an [ApiException] carries text written for a person; anything else is
+/// shown generically. For the app's own guidance use [showErrorMessage].
 void showErrorToast(BuildContext context, Object error) {
   final api = error is ApiException ? error : null;
-  final message = api?.displayMessage ?? 'Something went wrong. Try again.';
-  final reference = api?.requestId;
+  _showNegativeToast(
+    context,
+    api?.displayMessage ?? 'Something went wrong. Try again.',
+    reference: api?.requestId,
+  );
+}
 
+/// Shows the app's own guidance ("Choose a customer first.") as an error.
+///
+/// Passing it to [showErrorToast] wrapped in a `StateError` replaced it with
+/// "Something went wrong", so the user never learned what to fix.
+void showErrorMessage(BuildContext context, String message) =>
+    _showNegativeToast(context, message);
+
+void _showNegativeToast(BuildContext context, String message, {String? reference}) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(
