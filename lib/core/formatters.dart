@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
@@ -38,7 +39,7 @@ class Dates {
   /// "last updated" labels, where the point is recency rather than precision.
   static String relative(DateTime? value, {DateTime? now}) {
     if (value == null) return '—';
-    final reference = now ?? DateTime.now();
+    final reference = now ?? clock.now();
     final days = DateTime(
       reference.year,
       reference.month,
@@ -68,7 +69,7 @@ class Dates {
   /// cached reads, which the plan requires never be presented as live.
   static String sinceShort(DateTime? value, {DateTime? now}) {
     if (value == null) return 'never';
-    final delta = (now ?? DateTime.now()).difference(value);
+    final delta = (now ?? clock.now()).difference(value);
     if (delta.inSeconds < 45) return 'just now';
     if (delta.inMinutes < 60) return '${delta.inMinutes} min ago';
     if (delta.inHours < 24) return '${delta.inHours}h ago';

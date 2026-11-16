@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -50,7 +51,7 @@ class _DashboardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kpis = dashboard.kpis;
-    final fyLabel = Dates.financialYearLabel(DateTime.now());
+    final fyLabel = Dates.financialYearLabel(clock.now());
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),

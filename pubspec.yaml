@@ -34,6 +34,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  # Injectable "now", so relative dates and the FY label are testable.
+  clock: ^1.1.2
   fl_chart: ^1.2.0
   intl: ^0.20.2
   shared_preferences: ^2.5.4

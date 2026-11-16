@@ -1,6 +1,7 @@
 @Tags(['golden'])
 library;
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ledgable_app/ui/screens/dashboard_screen.dart';
@@ -22,6 +23,9 @@ import '../support/harness.dart';
 ///
 /// Regenerate with:
 ///   flutter test --update-goldens test/golden
+/// The day the goldens were recorded. The fixtures' dates sit just before it.
+final goldenNow = DateTime(2026, 9, 27, 12);
+
 void main() {
   setUpAll(() async {
     await setUpFormatting();
@@ -42,9 +46,14 @@ void main() {
     Brightness brightness = Brightness.light,
   }) async {
     useIPhoneSurface(tester);
-    await tester.pumpWidget(harness.wrap(screen, me: testMe(), brightness: brightness));
-    await tester.pumpAndSettle();
-    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/$name.png'));
+    // "3 days ago" and the FY label are read off the clock, so the goldens
+    // pin it to the day they were recorded. On the wall clock they went red
+    // the week after, once every recent date fell back to "24 Sept 2026".
+    await withClock(Clock.fixed(goldenNow), () async {
+      await tester.pumpWidget(harness.wrap(screen, me: testMe(), brightness: brightness));
+      await tester.pumpAndSettle();
+      await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/$name.png'));
+    });
   }
 
   group('dashboard', () {
