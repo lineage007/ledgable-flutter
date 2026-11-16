@@ -35,16 +35,26 @@ class Dates {
   static String toIso(DateTime value) =>
       DateTime.utc(value.year, value.month, value.day).toIso8601String();
 
+  /// [value]'s calendar day plus [days], at local midnight.
+  ///
+  /// Not `value.add(Duration(days: n))`: a day is 23 or 25 hours across a
+  /// daylight saving change, so adding 24h multiples to a midnight lands on
+  /// the wrong date in NSW, VIC, TAS, ACT and SA.
+  static DateTime addDays(DateTime value, int days) =>
+      DateTime(value.year, value.month, value.day + days);
+
   /// `Today`, `Yesterday`, `3 days ago`, then falls back to a date. Used for
   /// "last updated" labels, where the point is recency rather than precision.
   static String relative(DateTime? value, {DateTime? now}) {
     if (value == null) return '—';
     final reference = now ?? clock.now();
-    final days = DateTime(
+    // Calendar days compared in UTC, where every day is 24 hours. Local
+    // midnights are 23 or 25 hours apart across a daylight saving change.
+    final days = DateTime.utc(
       reference.year,
       reference.month,
       reference.day,
-    ).difference(DateTime(value.year, value.month, value.day)).inDays;
+    ).difference(DateTime.utc(value.year, value.month, value.day)).inDays;
     if (days == 0) return 'Today';
     if (days == 1) return 'Yesterday';
     if (days > 1 && days < 7) return '$days days ago';

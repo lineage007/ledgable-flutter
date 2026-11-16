@@ -58,7 +58,7 @@ class _NewInvoiceScreenState extends ConsumerState<NewInvoiceScreen> {
       _lines.fold(Decimal.zero, (total, line) => total + (line.lineTotal ?? Decimal.zero));
 
   DateTime get _effectiveDueDate =>
-      _dueDate ?? _issueDate.add(Duration(days: _contact?.paymentTermsDays ?? 14));
+      _dueDate ?? Dates.addDays(_issueDate, _contact?.paymentTermsDays ?? 14);
 
   Future<void> _pickContact() async {
     final chosen = await showContactPicker(context, ref);
