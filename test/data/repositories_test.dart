@@ -424,6 +424,47 @@ void main() {
 
       expect(extraction.impliedGst, Decimal.parse('16.75'));
       expect(extraction.gstLooksOff, isTrue);
+      expect(extraction.gstAboveMaximum, isTrue);
+      expect(extraction.gstBelowFullRate, isFalse);
+    });
+
+    test('less GST than one eleventh is told apart from too much', () async {
+      // A grocery shop mixing GST-free basic food: $50 total, $2 GST. Normal,
+      // so it must not be presented as the figure "not adding up".
+      http.on('GET', '/receipts/r-1', [
+        FakeReply(200, {
+          'id': 'r-1',
+          'fileName': 'r.jpg',
+          'ocrStatus': 'COMPLETED',
+          'extractions': [
+            {'totalAmount': '50.00', 'taxAmount': '2.00'},
+          ],
+        }),
+      ]);
+
+      final extraction = (await ReceiptsRepository(client).detail('r-1')).canonical!;
+
+      expect(extraction.gstBelowFullRate, isTrue);
+      expect(extraction.gstAboveMaximum, isFalse);
+    });
+
+    test('implied GST rounds to the nearest cent rather than truncating', () async {
+      // $10.99 / 11 = $0.9991; truncating said $0.99.
+      http.on('GET', '/receipts/r-1', [
+        FakeReply(200, {
+          'id': 'r-1',
+          'fileName': 'r.jpg',
+          'ocrStatus': 'COMPLETED',
+          'extractions': [
+            {'totalAmount': '10.99', 'taxAmount': '1.00'},
+          ],
+        }),
+      ]);
+
+      final extraction = (await ReceiptsRepository(client).detail('r-1')).canonical!;
+
+      expect(extraction.impliedGst, Decimal.parse('1.00'));
+      expect(extraction.gstLooksOff, isFalse);
     });
 
     test('a correct GST reading is not flagged', () async {

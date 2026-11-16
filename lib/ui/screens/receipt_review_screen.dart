@@ -168,16 +168,31 @@ class _ReceiptBody extends StatelessWidget {
                 'overstate your credits. Check the receipt and fix it on the web.',
           ),
           const SizedBox(height: 12),
-        ] else if (extraction.gstLooksOff) ...[
+        ] else if (extraction.gstAboveMaximum) ...[
           _Advisory(
             tone: PillTone.warning,
             icon: Icons.calculate_outlined,
             title: 'The GST figure does not add up',
             message:
-                'On a GST-inclusive total of '
-                '${Money.format(extraction.totalAmount)}, GST should be about '
-                '${Money.format(extraction.impliedGst)} — one eleventh. The receipt '
-                'reads ${Money.format(extraction.taxAmount)}. Worth a second look.',
+                'GST on a total of ${Money.format(extraction.totalAmount)} can be '
+                'at most ${Money.format(extraction.impliedGst)}, one eleventh. The '
+                'receipt reads ${Money.format(extraction.taxAmount)}, which is more. '
+                'Worth a second look.',
+          ),
+          const SizedBox(height: 12),
+        ] else if (extraction.gstBelowFullRate) ...[
+          // Not an error: a receipt mixing GST-free items (basic food, for
+          // one) carries less than one eleventh, and telling the user it
+          // "should" be one eleventh would push them to overclaim.
+          _Advisory(
+            tone: PillTone.neutral,
+            icon: Icons.calculate_outlined,
+            title: 'Less GST than a fully taxable total',
+            message:
+                'If every item on a total of ${Money.format(extraction.totalAmount)} '
+                'were taxable, GST would be ${Money.format(extraction.impliedGst)}. '
+                'The receipt reads ${Money.format(extraction.taxAmount)}. That is '
+                'normal when some items are GST-free. If none are, check the figure.',
           ),
           const SizedBox(height: 12),
         ],
