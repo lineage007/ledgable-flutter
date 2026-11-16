@@ -1,0 +1,10 @@
+# Golden tests compare rendered pixels, so they are the tests most likely to
+# disagree between machines (font rasterisation, Skia vs Impeller). Tagging them
+# lets CI run them separately, or exclude them, without a second test directory:
+#
+#   flutter test --exclude-tags golden      # logic only
+#   flutter test --tags golden              # goldens only
+#   flutter test --update-goldens test/golden
+tags:
+  golden:
+    description: Pixel comparisons against test/golden/goldens.
