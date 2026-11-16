@@ -40,6 +40,22 @@ void main() {
     expect(find.text(r'$1,342.90'), findsOneWidget);
   });
 
+  testWidgets('a refund in the queue is marked as money in by more than colour', (tester) async {
+    final queue = reviewQueuePayload();
+    final rows = queue['transactions'] as List;
+    rows[0] = {...rows[0] as Map<String, dynamic>, 'total': 4500, 'type': 'income'};
+    scriptQueue(queue: queue);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(harness.wrap(const TransactionReviewScreen(), me: testMe()));
+    await tester.pumpAndSettle();
+
+    expect(find.text(r'+$45.00'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'Money in \$45\.00')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'Money out \$1,342\.90')), findsOneWidget);
+    semantics.dispose();
+  });
+
   testWidgets('a swipe right files the transaction under the suggested category', (tester) async {
     scriptQueue();
     harness.http.on('POST', '/transactions/txn-a/categorise', [
